@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal de Conhecimento - Guru IA</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { background-color: #0f172a; color: #f8fafc; font-family: sans-serif; }
+    /* Estilização da barra de rolagem */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+  </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+  <!-- Sidebar -->
+  <aside class="w-64 bg-slate-900 border-r border-slate-800 p-4 flex flex-col justify-between shrink-0">
+    <div>
+      <!-- NOME DO SITE (EDITÁVEL) -->
+      <div class="flex items-center gap-3 mb-6">
+        <div class="bg-blue-600 p-2.5 rounded-xl text-white shadow-lg shadow-blue-500/20"><i class="fa-solid fa-robot text-xl"></i></div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center justify-between">
+            <h1 id="nome-site" class="font-bold text-slate-100 leading-tight text-base truncate">Guru IA</h1>
+            <button onclick="editarNomeSite()" class="text-slate-500 hover:text-blue-400 text-xs ml-1" title="Editar nome do site"><i class="fa-solid fa-pen"></i></button>
+          </div>
+          <p id="subtitulo-site" class="text-xs text-slate-400">Base de Conhecimento</p>
+        </div>
+      </div>
+
+      <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Filtro por Setor</div>
+      <div class="space-y-1 overflow-y-auto max-h-[calc(100vh-280px)] pr-1">
+        <button onclick="filtrarSetor('Todos')" class="w-full text-left px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-800 rounded transition">Todos os Setores</button>
+        <button onclick="filtrarSetor('Processos')" class="w-full text-left px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-800 rounded transition">Processos</button>
+        <button onclick="filtrarSetor('Manutenção')" class="w-full text-left px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-800 rounded transition">Manutenção</button>
+        <button onclick="filtrarSetor('Jira')" class="w-full text-left px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-800 rounded transition">Jira</button>
+        <button onclick="filtrarSetor('PSC')" class="w-full text-left px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-800 rounded transition">PSC</button>
+        <button onclick="filtrarSetor('RH')" class="w-full text-left px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-800 rounded transition">Recursos Humanos</button>
+        <button onclick="filtrarSetor('TI')" class="w-full text-left px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-800 rounded transition">Tecnologia (TI)</button>
+        <button onclick="filtrarSetor('Financeiro')" class="w-full text-left px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-800 rounded transition">Financeiro</button>
+        <button onclick="filtrarSetor('Qualidade')" class="w-full text-left px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-800 rounded transition">Qualidade</button>
+      </div>
+    </div>
+
+    <!-- PERFIL DO USUÁRIO -->
+    <div class="p-3 bg-slate-800/50 rounded-xl border border-slate-800 flex items-center justify-between mt-2">
+      <div class="flex items-center gap-3 min-w-0">
+        <div id="avatar-iniciais" class="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30 flex items-center justify-center font-bold text-xs shrink-0">CO</div>
+        <div class="truncate">
+          <div id="nome-usuario" class="text-xs font-bold text-slate-200 truncate">Colaborador</div>
+          <div id="cargo-usuario" class="text-[10px] text-slate-400 truncate">Usuário do Sistema</div>
+        </div>
+      </div>
+      <button onclick="editarUsuario()" class="text-slate-500 hover:text-blue-400 text-xs p-1 shrink-0" title="Editar Seu Perfil"><i class="fa-solid fa-user-pen"></i></button>
+    </div>
+  </aside>
+
+  <!-- Conteúdo Principal -->
+  <main class="flex-1 flex flex-col h-full bg-slate-950 overflow-hidden">
+    <!-- Header -->
+    <header class="h-16 border-b border-slate-800 px-6 flex items-center justify-between shrink-0">
+      <div class="flex items-center gap-4 text-xs text-slate-400">
+        <span>📄 <strong id="count-itp" class="text-slate-200">0</strong> ITPs</span>
+        <span>📋 <strong id="count-form" class="text-slate-200">0</strong> Forms</span>
+        <span>🎫 <strong id="count-ticket" class="text-slate-200">0</strong> Soluções</span>
+      </div>
+      <button onclick="abrirModal()" class="bg-blue-600 hover:bg-blue-500 text-white text-sm px-4 py-2 rounded-lg font-medium transition flex items-center gap-2">
+        <i class="fa-solid fa-plus"></i> Cadastrar Item
+      </button>
+    </header>
+
+    <!-- Área de Chat e Documentos -->
+    <div class="flex-1 p-6 overflow-y-auto flex flex-col justify-between" id="scroll-container">
+      <div class="max-w-4xl mx-auto w-full space-y-6">
+        
+        <!-- Apresentação do Assistente -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg">
+          <h2 class="text-lg font-bold text-slate-100 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-magnifying-glass text-blue-400"></i> Extração de Trechos por Sinônimos
+          </h2>
+          <p class="text-sm text-slate-400 leading-relaxed">
+            Pesquise qualquer dúvida! O sistema analisa as ITPs e extrai <strong>apenas o trecho específico</strong> correspondente à sua dúvida, mesmo usando palavras equivalentes (ex: <i>"turno"</i> ➔ encontra <i>"escala"</i>).
+          </p>
+        </div>
+
+        <!-- Lista de Documentos da Base -->
+        <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-5">
+          <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center justify-between">
+            <span id="titulo-secao-resultados">Documentos na Base de Conhecimento</span>
+            <span id="setor-atual-label" class="text-xs text-blue-400 font-normal">Exibindo: Todos os Setores</span>
+          </h3>
+          <div id="lista-itens" class="space-y-3"></div>
+        </div>
+      </div>
+
+      <!-- Barra de Input / Pergunta -->
+      <div class="max-w-4xl mx-auto w-full mt-6 sticky bottom-0 bg-slate-950/90 pt-2 backdrop-blur-sm">
+        <div class="relative flex items-center">
+          <input type="text" id="busca" oninput="buscarInteligente()" placeholder="Digite sua dúvida (ex: como trocar de turno, formulário do jira, folga)..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-blue-500 pl-10 pr-4 shadow-inner">
+          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-slate-500 text-sm"></i>
+        </div>
+        <div class="text-[11px] text-slate-500 mt-1 px-1 flex justify-between">
+          <span>O sistema cruza sinônimos e traz a frase exata da solução.</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- POP-UP DE CADASTRO DE ITEM -->
+  <div id="modal-cadastro" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-xl p-6 space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="font-bold text-slate-100">Cadastrar Novo Item</h3>
+        <button onclick="fecharModal()" class="text-slate-400 hover:text-slate-200"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <form id="form-item" onsubmit="salvarItem(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Tipo de Documento</label>
+          <select id="tipo" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-sm text-slate-200">
+            <option value="ITP">ITP / Procedimento</option>
+            <option value="Formulário">Formulário (Forms)</option>
+            <option value="Ticket">Solução de Ticket</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Setor</label>
+          <select id="setor" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-sm text-slate-200">
+            <option value="Processos">Processos</option>
+            <option value="Manutenção">Manutenção</option>
+            <option value="Jira">Jira</option>
+            <option value="PSC">PSC</option>
+            <option value="RH">Recursos Humanos</option>
+            <option value="TI">Tecnologia (TI)</option>
+            <option value="Financeiro">Financeiro</option>
+            <option value="Qualidade">Qualidade</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Título</label>
+          <input type="text" id="titulo" required placeholder="Ex: ITP-002: Escala de Trabalho e Troca de Turnos" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-sm text-slate-200">
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Descrição / Passo a Passo detalhado</label>
+          <textarea id="descricao" rows="3" required placeholder="Ex: Para solicitar alteração da escala ou troca de turno entre colaboradores, envie o formulário aprovado com 48h de antecedência..." class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-sm text-slate-200"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Link do Documento/Forms/Anexo</label>
+          <input type="text" id="link" placeholder="Cole o link completo (ex: https://drive.google.com/file/d/... ou www.link.com)" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-sm text-slate-200">
+          <p class="text-[10px] text-slate-500 mt-1">Insira links do Google Drive, OneDrive ou formulários externos.</p>
+        </div>
+
+        <div class="flex gap-2 pt-2">
+          <button type="button" onclick="fecharModal()" class="w-1/2 bg-slate-800 text-slate-300 py-2 rounded-lg text-sm">Cancelar</button>
+          <button type="submit" class="w-1/2 bg-blue-600 hover:bg-blue-500 text-white py-2 rounded-lg text-sm font-bold">Salvar Item</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Dicionário Ampliado de Sinônimos e Termos Equivalentes
+    const sinonimos = {
+      'turno': ['escala', 'horario', 'jornada', 'troca', 'plantao', 'folga', 'trabalho'],
+      'escala': ['turno', 'horario', 'jornada', 'troca', 'plantao', 'folga'],
+      'ferias': ['recesso', 'folga', 'ausencia', 'descanso', 'licenca'],
+      'chamado': ['ticket', 'suporte', 'atendimento', 'duvida', 'jira', 'chamados'],
+      'ticket': ['chamado', 'suporte', 'atendimento', 'jira', 'solucao'],
+      'jira': ['board', 'kanban', 'projeto', 'ticket', 'chamado'],
+      'computador': ['ti', 'notebook', 'pc', 'senha', 'sistema', 'acesso', 'pasta'],
+      'pagamento': ['financeiro', 'reembolso', 'nota', 'fatura', 'salario', 'holerite']
+    };
+
+    const baseInicial = [
+      { tipo: 'ITP', setor: 'Processos', titulo: 'ITP-001: Mapeamento de Novos Fluxos', descricao: 'Passo a passo para mapear e homologar novos processos operacionais na empresa. Requer validação do gestor da área.', link: '' },
+      { tipo: 'ITP', setor: 'RH', titulo: 'ITP-002: Escala de Trabalho e Alteração de Jornada', descricao: 'Para solicitar alteração da sua escala de trabalho ou troca de turno entre colaboradores, envie o formulário aprovado pelo líder direto com 48 horas de antecedência. Em caso de folga compensatória, alinhe com o RH.', link: '' },
+      { tipo: 'Formulário', setor: 'Jira', titulo: 'Formulário de Solicitação de Board no Jira', descricao: 'Para criar um projeto ou board no Jira, preencha o formulário oficial de TI. O prazo de liberação é de até 24 horas úteis.', link: '' },
+      { tipo: 'Ticket', setor: 'Manutenção', titulo: 'Solicitação de Manutenção Preventiva', descricao: 'Para registrar chamados de manutenção para equipamentos e máquinas, abra um ticket na categoria Manutenção Preventiva detalhando o código do equipamento.', link: '' },
+      { tipo: 'ITP', setor: 'PSC', titulo: 'Instrução de Atendimento PSC', descricao: 'O atendimento no setor PSC deve seguir a triagem por nível de urgência. Dúvidas sobre solicitações devem ser enviadas no canal interno do Teams.', link: '' }
+    ];
+
+    let bancoDados = JSON.parse(localStorage.getItem('smart_assist_db')) || baseInicial;
+    let setorAtivo = 'Todos';
+
+    window.onload = function() {
+      if(localStorage.getItem('nome_site')) {
+        document.getElementById('nome-site').innerText = localStorage.getItem('nome_site');
+      }
+      
+      if(localStorage.getItem('nome_usuario')) {
+        document.getElementById('nome-usuario').innerText = localStorage.getItem('nome_usuario');
+        atualizarIniciais(localStorage.getItem('nome_usuario'));
+      }
+      
+      if(localStorage.getItem('cargo_usuario')) {
+        document.getElementById('cargo-usuario').innerText = localStorage.getItem('cargo_usuario');
+      }
+
+      atualizarTela();
+    };
+
+    function editarNomeSite() {
+      const novoNome = prompt("Digite o nome do portal/site:", document.getElementById('nome-site').innerText);
+      if(novoNome) {
+        document.getElementById('nome-site').innerText = novoNome;
+        localStorage.setItem('nome_site', novoNome);
+      }
+    }
+
+    function editarUsuario() {
+      const novoNome = prompt("Digite o seu nome:", document.getElementById('nome-usuario').innerText);
+      const novoCargo = prompt("Digite o seu cargo/função:", document.getElementById('cargo-usuario').innerText);
+      if(novoNome) {
+        document.getElementById('nome-usuario').innerText = novoNome;
+        localStorage.setItem('nome_usuario', novoNome);
+        atualizarIniciais(novoNome);
+      }
+      if(novoCargo) {
+        document.getElementById('cargo-usuario').innerText = novoCargo;
+        localStorage.setItem('cargo_usuario', novoCargo);
+      }
+    }
+
+    function atualizarIniciais(nome) {
+      const partes = nome.trim().split(' ');
+      let iniciais = partes[0][0];
+      if(partes.length > 1) iniciais += partes[partes.length - 1][0];
+      document.getElementById('avatar-iniciais').innerText = iniciais.toUpperCase();
+    }
+
+    function abrirModal() { document.getElementById('modal-cadastro').classList.remove('hidden'); }
+    function fecharModal() { document.getElementById('modal-cadastro').classList.add('hidden'); }
+
+    function salvarItem(e) {
+      e.preventDefault();
+      const novoItem = {
+        tipo: document.getElementById('tipo').value,
+        setor: document.getElementById('setor').value,
+        titulo: document.getElementById('titulo').value,
+        descricao: document.getElementById('descricao').value,
+        link: document.getElementById('link').value
+      };
+
+      bancoDados.push(novoItem);
+      localStorage.setItem('smart_assist_db', JSON.stringify(bancoDados));
+      atualizarTela();
+      fecharModal();
+      document.getElementById('form-item').reset();
+    }
+
+    // Tratamento universal de links para garantir que abram em nova aba sem erro
+    function tratarLink(link) {
+      if (!link) return '';
+      let l = link.trim();
+      if (!l) return '';
+      if (!l.startsWith('http://') && !l.startsWith('https://')) {
+        l = 'https://' + l;
+      }
+      return l;
+    }
+
+    function toggleDetalhes(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.toggle('hidden');
+    }
+
+    function atualizarTela(itens = null) {
+      const listaExibicao = itens || (setorAtivo === 'Todos' ? bancoDados : bancoDados.filter(i => i.setor === setorAtivo));
+      const container = document.getElementById('lista-itens');
+      const tituloSecao = document.getElementById('titulo-secao-resultados');
+      
+      if (tituloSecao) tituloSecao.innerText = 'Documentos na Base de Conhecimento';
+      if (!container) return;
+
+      container.innerHTML = '';
+
+      if (listaExibicao.length === 0) {
+        container.innerHTML = '<p class="text-xs text-slate-500 py-2">Nenhum documento encontrado.</p>';
+      } else {
+        listaExibicao.forEach(item => {
+          const urlLink = tratarLink(item.link);
+          container.innerHTML += `
+            <div class="p-3.5 bg-slate-800/60 rounded-xl border border-slate-700/60 hover:border-slate-600 transition">
+              <div class="flex items-center justify-between mb-1.5">
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">${item.tipo} - ${item.setor}</span>
+                ${urlLink ? `<a href="${urlLink}" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-400 hover:underline flex items-center gap-1 font-semibold"><i class="fa-solid fa-paperclip"></i> Abrir Anexo/Link <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>` : ''}
+              </div>
+              <h4 class="text-sm font-bold text-slate-200">${item.titulo}</h4>
+              <p class="text-xs text-slate-400 mt-1">${item.descricao}</p>
+            </div>`;
+        });
+      }
+
+      const countItp = document.getElementById('count-itp');
+      const countForm = document.getElementById('count-form');
+      const countTicket = document.getElementById('count-ticket');
+      const setorLabel = document.getElementById('setor-atual-label');
+
+      if (countItp) countItp.innerText = bancoDados.filter(i => i.tipo === 'ITP').length;
+      if (countForm) countForm.innerText = bancoDados.filter(i => i.tipo === 'Formulário').length;
+      if (countTicket) countTicket.innerText = bancoDados.filter(i => i.tipo === 'Ticket').length;
+      if (setorLabel) setorLabel.innerText = `Exibindo: ${setorAtivo === 'Todos' ? 'Todos os Setores' : setorAtivo}`;
+    }
+
+    // PESQUISA PONTUAL: EXTRAÇÃO APENAS DO TRECHO RELACIONADO COM A PALAVRA OU SINÔNIMO
+    function buscarInteligente() {
+      const termoOriginal = document.getElementById('busca').value.toLowerCase().trim();
+      const container = document.getElementById('lista-itens');
+      const tituloSecao = document.getElementById('titulo-secao-resultados');
+      
+      if (!termoOriginal) {
+        atualizarTela();
+        return;
+      }
+
+      if (tituloSecao) tituloSecao.innerText = 'Trechos e Respostas Encontradas';
+
+      // Separa os termos buscados e expande com dicionário de sinônimos
+      const palavrasDigitadas = termoOriginal.split(' ').filter(p => p.length > 2);
+      let termosPesquisa = [...palavrasDigitadas];
+      
+      palavrasDigitadas.forEach(palavra => {
+        if (sinonimos[palavra]) {
+          termosPesquisa = termosPesquisa.concat(sinonimos[palavra]);
+        }
+      });
+
+      const documentosFiltrados = bancoDados.filter(i => setorAtivo === 'Todos' || i.setor === setorAtivo);
+      let resultadosPontuais = [];
+
+      documentosFiltrados.forEach((item, docIdx) => {
+        // Divide o texto do documento em frases/parágrafos
+        const frases = item.descricao.split(/(?<=[.!?])\s+/);
+        let melhoresFrases = [];
+
+        frases.forEach(frase => {
+          const fraseLower = frase.toLowerCase();
+          const encontrouTermo = termosPesquisa.some(termo => fraseLower.includes(termo));
+          if (encontrouTermo) {
+            melhoresFrases.push(frase);
+          }
+        });
+
+        // Se encontrou no título mas não na descrição, exibe a primeira frase relevante
+        if (melhoresFrases.length === 0) {
+          const tituloLower = item.titulo.toLowerCase();
+          if (termosPesquisa.some(termo => tituloLower.includes(termo))) {
+            melhoresFrases.push(frases[0] || item.descricao);
+          }
+        }
+
+        if (melhoresFrases.length > 0) {
+          resultadosPontuais.push({
+            documento: item,
+            trechoExtraido: melhoresFrases.join(' '),
+            id: `doc-ext-${docIdx}`
+          });
+        }
+      });
+
+      container.innerHTML = '';
+
+      if (resultadosPontuais.length === 0) {
+        container.innerHTML = `
+          <div class="p-4 bg-slate-800/40 rounded-xl border border-slate-800 text-center space-y-1">
+            <p class="text-xs text-slate-400">Nenhum trecho correspondente foi encontrado para "<strong>${termoOriginal}</strong>".</p>
+            <p class="text-[11px] text-slate-500">Tente buscar por termos como <i>turno, escala, formulário, suporte, etc.</i></p>
+          </div>
+        `;
+        return;
+      }
+
+      resultadosPontuais.forEach(res => {
+        const item = res.documento;
+        const urlLink = tratarLink(item.link);
+
+        container.innerHTML += `
+          <div class="p-4 bg-blue-950/40 rounded-xl border border-blue-500/30 space-y-3 shadow-md">
+            <div class="flex items-start gap-3">
+              <div class="p-2 bg-blue-600/20 text-blue-400 rounded-lg shrink-0 mt-0.5">
+                <i class="fa-solid fa-quote-left text-sm"></i>
+              </div>
+              <div class="flex-1">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-blue-400">Trecho exato encontrado:</span>
+                <p class="text-sm font-medium text-slate-100 leading-relaxed mt-0.5">"${res.trechoExtraido}"</p>
+              </div>
+            </div>
+
+            <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
+              <div class="flex items-center gap-2 truncate">
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">${item.tipo} - ${item.setor}</span>
+                <span class="font-semibold text-slate-300 truncate">${item.titulo}</span>
+              </div>
+              
+              <div class="flex items-center gap-3 shrink-0 ml-2">
+                <button onclick="toggleDetalhes('${res.id}')" class="text-xs text-slate-400 hover:text-blue-400 underline flex items-center gap-1">
+                  <i class="fa-solid fa-circle-info"></i> Documento completo
+                </button>
+                ${urlLink ? `<a href="${urlLink}" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-400 hover:underline font-bold flex items-center gap-1"><i class="fa-solid fa-paperclip"></i> Abrir Anexo <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>` : ''}
+              </div>
+            </div>
+
+            <div id="${res.id}" class="hidden p-3 bg-slate-900 rounded-lg border border-slate-800 text-xs text-slate-300 space-y-1 mt-2">
+              <div class="font-bold text-slate-200">Texto Completo da ITP:</div>
+              <p class="leading-relaxed text-slate-400">${item.descricao}</p>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function filtrarSetor(setor) {
+      setorAtivo = setor;
+      document.getElementById('busca').value = '';
+      atualizarTela();
+    }
+  </script>
+</body>
+</html>  </div>
+          `
